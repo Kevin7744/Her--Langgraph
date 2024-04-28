@@ -6,18 +6,23 @@ from langchain.agents import create_openai_functions_agent
 from langchain_openai.chat_models import ChatOpenAI
 from langchain.tools import tool
 from langchain.pydantic_v1 import BaseModel, Field
+from langgraph.graph import END, MessageGraph
 
 from supabase import create_client
 
+from typing import List, Tuple, Annotated, TypedDict
+import operator
 import datetime
 import random
 import requests
 
 load_dotenv()
-
+openai_api_key = os.getenv("OPENAI_API_KEY")
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+model = ChatOpenAI(temperature=0, api_key=openai_api_key)
+
 
 ############################ --Tools -- #########################################################
 class CurrentDateTimeInput(BaseModel):
@@ -30,7 +35,7 @@ def current_date_time() -> str:
     """
     current_datetime = datetime.datetime.now()
     return f"The current date and time is: {current_datetime.strftime('%d/%m/%Y %H:%M')}"
-   
+
 class GetTranscriptsInput(BaseModel):
     pass
 
@@ -79,7 +84,10 @@ def make_outbound_call(phone_number: str, agent_type: str, agent_name: str, prom
     else:
         return f"Failed to make outbound call, status code: {response.status_code}"
 
-# Define graph state
+
+#################################### --STATE-- ######################################################################
+graph = MessageGraph()
+
 
 # Define the nodes
 
