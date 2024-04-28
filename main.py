@@ -29,6 +29,7 @@ def current_date_time() -> str:
     Function to get the current date and time
     """
     current_datetime = datetime.datetime.now()
+    return f"The current date and time is: {current_datetime.strftime('%d/%m/%Y %H:%M')}"
    
 class GetTranscriptsInput(BaseModel):
     pass
